@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import * as XLSX from 'xlsx';
 import Table from "../components/Table";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TablePage = () => {
   const fileInputRef = useRef();
@@ -27,24 +28,51 @@ const TablePage = () => {
   }
 
   const handleButtonClick = () => {
-    fileInputRef.current.click(); // Trigger the hidden file input
+    fileInputRef.current.click();
   };
 
   return (
-    <div>
-      <div>
-        <button onClick={handleButtonClick}>
-          Import Excel File
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          style={{display: 'none'}}
-          accept=".xlsx, .xls"
-          onChange={handleFileUpload}
-        />
+    <div className="container py-4">
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h2 className="card-title mb-4">Excel Data Viewer</h2>
+              <div className="d-flex align-items-center">
+                <button 
+                  onClick={handleButtonClick}
+                  className="btn btn-primary"
+                >
+                  <i className="bi bi-file-earmark-excel me-2"></i>
+                  Import Excel File
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{display: 'none'}}
+                  accept=".xlsx, .xls"
+                  onChange={handleFileUpload}
+                />
+                {tabledata.length > 0 && (
+                  <span className="ms-3 text-success">
+                    <i className="bi bi-check-circle-fill me-2"></i>
+                    File loaded successfully
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <Table data={tabledata} />
+      <div className="row">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <Table data={tabledata} />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
