@@ -1,9 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { setSelectedRow } from '../redux/reducers/excelReducer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Table = ({ data }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [tooltipData, setTooltipData] = useState({ show: false, imageUrl: '', x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (tooltipData.show) {
+        setTooltipData(prev => ({
+          ...prev,
+          x: e.clientX + 15,
+          y: e.clientY + 15
+        }));
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [tooltipData.show]);
 
   if (!data || data.length === 0) {
     return (
@@ -34,34 +55,67 @@ const Table = ({ data }) => {
     setCurrentPage(1);
   };
 
+  const handleRowMouseEnter = (row) => {
+    const imageUrlIndex = headers.findIndex(header => header === "Image URL");
+    if (imageUrlIndex !== -1 && row[imageUrlIndex]) {
+      setTooltipData({
+        show: true,
+        imageUrl: row[imageUrlIndex],
+        x: 0,
+        y: 0
+      });
+    }
+  };
+
+  const handleRowMouseLeave = () => {
+    setTooltipData(prev => ({ ...prev, show: false }));
+  };
+
+  const handleRowClick = (rowIndex) => {
+    // Calculate the actual row index in the full dataset
+    const actualRowIndex = (currentPage - 1) * rowsPerPage + rowIndex;
+    dispatch(setSelectedRow(actualRowIndex));
+    navigate('/detail');
+  };
+
+  // Filter out the Image URL column from headers and rows
+  const imageUrlIndex = headers.findIndex(header => header === "Image URL");
+  const filteredHeaders = headers.filter((_, index) => index !== imageUrlIndex);
+  const filteredRows = paginatedRows.map(row => row.filter((_, index) => index !== imageUrlIndex));
+
   return (
     <>
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-striped">
           <thead className="table-dark">
             <tr>
-              {headers.map((cell, index) => (
+              {filteredHeaders.map((cell, index) => (
                 <th key={index} className="text-nowrap align-middle">{cell}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {paginatedRows.map((row, rowIndex) => (
-              <tr key={rowIndex}>
+            {filteredRows.map((row, rowIndex) => (
+              <tr 
+                key={rowIndex}
+                onMouseEnter={() => handleRowMouseEnter(paginatedRows[rowIndex])}
+                onMouseLeave={handleRowMouseLeave}
+                onClick={() => handleRowClick(rowIndex)}
+                style={{ cursor: 'pointer' }}
+              >
                 {row.map((cell, colIndex) => (
                   <td key={colIndex} className="text-nowrap align-middle">
-                    {headers[colIndex] === "Product URL" ? (
-                      <a href={cell} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">
+                    {filteredHeaders[colIndex] === "Product URL" ? (
+                      <a 
+                        href={cell} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <i className="bi bi-box-arrow-up-right me-1"></i>
                         Visit
                       </a>
-                    ) : headers[colIndex] === "Image URL" ? (
-                      <img 
-                        src={cell} 
-                        alt="Product" 
-                        className="img-thumbnail" 
-                        style={{ width: '50px', height: '50px', objectFit: 'cover' }} 
-                      />
                     ) : (
                       cell
                     )}
@@ -72,6 +126,26 @@ const Table = ({ data }) => {
           </tbody>
         </table>
       </div>
+
+      {/* Image Tooltip */}
+      {tooltipData.show && (
+        <div 
+          className="position-fixed bg-white border rounded shadow-lg p-2"
+          style={{
+            zIndex: 1000,
+            left: tooltipData.x,
+            top: tooltipData.y,
+            maxWidth: '300px'
+          }}
+        >
+          <img 
+            src={tooltipData.imageUrl} 
+            alt="Product Preview" 
+            className="img-fluid"
+            style={{ maxHeight: '200px', objectFit: 'contain' }}
+          />
+        </div>
+      )}
 
       {/* Display Controls */}
       <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
@@ -100,8 +174,8 @@ const Table = ({ data }) => {
       <nav aria-label="Table navigation" className="mt-4">
         <ul className="pagination justify-content-center flex-wrap">
           <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-            <button
-              className="page-link"
+            <button 
+              className="page-link" 
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
@@ -135,8 +209,8 @@ const Table = ({ data }) => {
           })()}
 
           <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-            <button
-              className="page-link"
+            <button 
+              className="page-link" 
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
