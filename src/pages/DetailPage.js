@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Line } from 'react-chartjs-2';
 import {
@@ -16,12 +16,14 @@ import {
   Container, Row, Col, Card, Button, Badge
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { getChartData } from '../redux/reducers/excelReducer';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const DetailPage = () => {
   const navigate = useNavigate();
   const { selectedRow, data } = useSelector((state) => state.excel);
+  const dispatch = useDispatch();
 
   if (!selectedRow || !data.length) {
     return (
@@ -98,7 +100,8 @@ const DetailPage = () => {
 
   const chartLabels = Array.from({ length: 10 }, (_, i) => `T-${10 - i}`);
   const chartData = Array.from({ length: 10 }, () => Math.floor(Math.random() * 100) + 1);
-
+  dispatch(getChartData());
+  
   const rankChart = {
     labels: chartLabels,
     datasets: [
