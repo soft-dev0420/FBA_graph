@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import * as XLSX from 'xlsx';
 import Table from '../components/Table';
 import { setExcelData } from '../redux/reducers/excelReducer';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container, Row, Col, Card, Button, Badge, Alert } from 'react-bootstrap';
 
 const TablePage = () => {
   const [data, setData] = useState([]);
@@ -31,36 +31,34 @@ const TablePage = () => {
   };
 
   return (
-    <div className="container-fluid py-5 bg-light min-vh-100">
-      <div className="row justify-content-center">
-        <div className="col-12 col-xl-10">
-          <div className="card border-0 shadow-lg">
-            <div className="card-header bg-primary text-white py-4 rounded-top">
-              <div className="d-flex justify-content-between align-items-center">
-                <h4 className="mb-0">
-                  <i className="bi bi-table me-2"></i>
-                  Excel Data Viewer
-                </h4>
-                {data.length > 0 && (
-                  <span className="badge bg-white text-primary fw-medium">
-                    <i className="bi bi-file-earmark-excel me-1"></i>
-                    {fileName}
-                  </span>
-                )}
+    <Container fluid className="py-5 bg-light min-vh-100">
+      <Row className="justify-content-center">
+        <Col xs={12} xl={10}>
+          <Card className="shadow-lg border-0">
+            <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center rounded-top py-4">
+              <div className="d-flex align-items-center">
+                <i className="bi bi-table fs-3 me-2"></i>
+                <h4 className="mb-0">Excel Data Viewer</h4>
               </div>
-            </div>
+              {data.length > 0 && (
+                <Badge bg="light" text="primary" className="fs-6 fw-medium shadow-sm px-3 py-2 rounded-pill">
+                  <i className="bi bi-file-earmark-excel me-1"></i>
+                  {fileName}
+                </Badge>
+              )}
+            </Card.Header>
 
-            <div className="card-body p-4 bg-white rounded-bottom">
+            <Card.Body className="bg-white rounded-bottom p-4">
               {data.length === 0 ? (
                 <div className="text-center py-5">
-                  <div className="mb-4">
-                    <i className="bi bi-file-earmark-excel text-primary" style={{ fontSize: '4rem' }}></i>
-                  </div>
-                  <h4 className="text-secondary mb-3">No Excel File Loaded</h4>
+                  <i className="bi bi-file-earmark-excel text-primary" style={{ fontSize: '4rem' }}></i>
+                  <h4 className="text-secondary mt-3 mb-2">No Excel File Loaded</h4>
                   <p className="text-muted mb-4">Start by uploading a spreadsheet to visualize your data.</p>
-                  <label htmlFor="fileInput" className="btn btn-lg btn-primary">
-                    <i className="bi bi-upload me-2"></i>
-                    Upload Excel File
+                  <label htmlFor="fileInput">
+                    <Button variant="primary" size="lg" as="span">
+                      <i className="bi bi-upload me-2"></i>
+                      Upload Excel File
+                    </Button>
                   </label>
                   <input
                     type="file"
@@ -76,9 +74,11 @@ const TablePage = () => {
               ) : (
                 <>
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <label htmlFor="fileInput" className="btn btn-outline-primary">
-                      <i className="bi bi-arrow-clockwise me-2"></i>
-                      Upload Another File
+                    <label htmlFor="fileInput">
+                      <Button variant="outline-primary" as="span">
+                        <i className="bi bi-arrow-clockwise me-2"></i>
+                        Upload Another File
+                      </Button>
                     </label>
                     <input
                       type="file"
@@ -92,14 +92,17 @@ const TablePage = () => {
                       Click rows to inspect data
                     </small>
                   </div>
-                  <Table data={data} />
+                  {/* Table should be a nice looking table! */}
+                  <div className="table-responsive">
+                    <Table data={data} />
+                  </div>
                 </>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

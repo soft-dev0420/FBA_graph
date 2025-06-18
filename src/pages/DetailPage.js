@@ -12,6 +12,9 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import {
+  Container, Row, Col, Card, Button, Badge
+} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -22,16 +25,18 @@ const DetailPage = () => {
 
   if (!selectedRow || !data.length) {
     return (
-      <div className="modern-container text-center py-5">
-        <div className="modern-empty card p-5 shadow-sm">
-          <div className="display-1 text-muted">
+      <Container className="d-flex align-items-center justify-content-center min-vh-100">
+        <Card className="p-5 shadow-lg border-0 text-center">
+          <div className="display-1 text-muted mb-3">
             <i className="bi bi-box"></i>
           </div>
-          <h2 className="mt-3">No Product Selected</h2>
-          <p className="text-muted">Please select a product from the table to view its details</p>
-          <button className="btn btn-primary mt-3" onClick={() => navigate('/')}>↩ Back to Products</button>
-        </div>
-      </div>
+          <h2>No Product Selected</h2>
+          <p className="text-muted">Please select a product from the table to view its details.</p>
+          <Button variant="primary" size="lg" className="mt-3" onClick={() => navigate('/')}>
+            <i className="bi bi-arrow-left me-2"></i>Back to Products
+          </Button>
+        </Card>
+      </Container>
     );
   }
 
@@ -41,15 +46,15 @@ const DetailPage = () => {
   const renderValue = (header, value) => {
     if (header === "Product URL") {
       return (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary btn-sm">
+        <Button variant="outline-primary" size="sm" href={value} target="_blank" rel="noopener noreferrer">
           <i className="bi bi-box-arrow-up-right me-1"></i> View Product
-        </a>
+        </Button>
       );
     }
     if (header === "Image URL") {
       return (
-        <div className="modern-image-wrapper">
-          <img src={value} alt="Product" className="img-fluid rounded shadow-sm mb-2" onError={(e) => {
+        <div className="mb-2 text-center">
+          <img src={value} alt="Product" className="img-fluid rounded shadow-sm mb-2" style={{ maxHeight: '250px' }} onError={(e) => {
             e.target.onerror = null;
             e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
           }} />
@@ -101,75 +106,123 @@ const DetailPage = () => {
         label: 'Rank Over Time',
         data: chartData,
         borderColor: '#0d6efd',
-        backgroundColor: 'rgba(13, 110, 253, 0.2)',
+        backgroundColor: 'rgba(13, 110, 253, 0.15)',
         tension: 0.4,
       },
     ],
   };
 
   return (
-    <div className="container py-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <button className="btn btn-outline-secondary" onClick={() => navigate('/')}>← Back</button>
-        <h1 className="h3 mb-0">Product Details</h1>
-      </div>
+    <Container className="py-5">
+      <Row className="mb-4 align-items-center">
+        <Col xs="auto">
+          <Button variant="outline-secondary" onClick={() => navigate('/')}>
+            <i className="bi bi-arrow-left me-1"></i> Back
+          </Button>
+        </Col>
+        <Col>
+          <h1 className="h3 mb-0">Product Details</h1>
+        </Col>
+      </Row>
 
-      <div className="row">
-        <div className="col-md-7">
-          {nameIndex !== -1 && <h2 className="mb-3 fw-bold">{rowData[nameIndex]}</h2>}
-          <div className="mb-4">
-            {priceIndex !== -1 && <div className="mb-2"><strong>Price:</strong> {renderValue(headers[priceIndex], rowData[priceIndex])}</div>}
-            {rankIndex !== -1 && <div className="mb-2"><strong>Rank:</strong> {renderValue(headers[rankIndex], rowData[rankIndex])}</div>}
-            {urlIndex !== -1 && <div className="mb-2">{renderValue(headers[urlIndex], rowData[urlIndex])}</div>}
-          </div>
+      <Row className="g-4">
+        <Col md={7}>
+          <Card className="shadow-sm border-0 mb-4">
+            <Card.Body>
+              {nameIndex !== -1 && (
+                <Card.Title className="mb-3 fs-2 fw-bold">
+                  <i className="bi bi-box-seam me-2 text-primary"></i>
+                  {rowData[nameIndex]}
+                </Card.Title>
+              )}
+              <Row className="mb-3">
+                {priceIndex !== -1 && (
+                  <Col xs="auto">
+                    <Badge bg="success" className="fs-6 me-2">
+                      <i className="bi bi-cash-coin me-1"></i>
+                      {renderValue(headers[priceIndex], rowData[priceIndex])}
+                    </Badge>
+                  </Col>
+                )}
+                {rankIndex !== -1 && (
+                  <Col xs="auto">
+                    <Badge bg="info" className="fs-6 me-2">
+                      <i className="bi bi-bar-chart-line me-1"></i>
+                      {renderValue(headers[rankIndex], rowData[rankIndex])}
+                    </Badge>
+                  </Col>
+                )}
+                {urlIndex !== -1 && (
+                  <Col xs="auto">{renderValue(headers[urlIndex], rowData[urlIndex])}</Col>
+                )}
+              </Row>
 
-          <div className="mb-4">
-            <h5 className="border-bottom pb-2 mb-3 text-primary">Rank Trend</h5>
-            <Line data={rankChart} options={{ responsive: true, plugins: { legend: { display: false } } }} />
-          </div>
+              <Card className="bg-light mb-4">
+                <Card.Body>
+                  <Card.Title className="fs-6 text-primary mb-3">
+                    <i className="bi bi-graph-up-arrow me-2"></i>Rank Trend
+                  </Card.Title>
+                  <Line data={rankChart} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+                </Card.Body>
+              </Card>
 
-          {Object.entries(sections).map(([title, keys]) => (
-            keys.length > 0 && (
-              <div key={title} className="mb-4">
-                <h5 className="border-bottom pb-2 mb-3 text-primary">{title}</h5>
-                <div className="row g-3">
-                  {keys.map((header, index) => (
-                    <div key={index} className="col-sm-6">
-                      <div className="border p-3 rounded shadow-sm h-100">
-                        <div className="fw-semibold text-muted small mb-1">{header}</div>
-                        <div>{renderValue(header, rowData[headers.indexOf(header)])}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          ))}
-        </div>
-
-        <div className="col-md-5">
-          <h5 className="border-bottom pb-2 mb-3 text-primary">Product Images</h5>
-          <div className="row g-3">
-            {imageFields.map(({ header, value }, index) => (
-              <div key={index} className="col-6">
-                <div className="border rounded p-2 h-100 text-center">
-                  <img
-                    src={value}
-                    alt={header}
-                    className="img-fluid rounded mb-2"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
-                    }}
-                  />
-                  <small className="text-muted d-block">{header}</small>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+              {Object.entries(sections).map(([title, keys]) => (
+                keys.length > 0 && (
+                  <div key={title} className="mb-4">
+                    <h5 className="border-bottom pb-2 mb-3 text-primary">{title}</h5>
+                    <Row className="g-3">
+                      {keys.map((header, index) => (
+                        <Col sm={6} key={index}>
+                          <Card className="border-0 shadow-sm h-100">
+                            <Card.Body>
+                              <div className="fw-semibold text-muted small mb-1">{header}</div>
+                              <div>{renderValue(header, rowData[headers.indexOf(header)])}</div>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  </div>
+                )
+              ))}
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={5}>
+          <Card className="shadow-sm border-0">
+            <Card.Body>
+              <Card.Title className="mb-3 text-primary">
+                <i className="bi bi-image me-2"></i>Product Images
+              </Card.Title>
+              <Row className="g-3">
+                {imageFields.length === 0 && (
+                  <Col>
+                    <div className="text-muted text-center">No images available</div>
+                  </Col>
+                )}
+                {imageFields.map(({ header, value }, index) => (
+                  <Col xs={6} key={index}>
+                    <Card className="border-0 p-2 h-100 text-center shadow-sm">
+                      <img
+                        src={value}
+                        alt={header}
+                        className="img-fluid rounded mb-2"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
+                        }}
+                        style={{ maxHeight: '160px', objectFit: 'contain' }}
+                      />
+                      <small className="text-muted d-block">{header}</small>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
