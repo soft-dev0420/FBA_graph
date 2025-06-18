@@ -43,7 +43,7 @@ const TablePage = () => {
   };
 
   return (
-    <Container fluid className="py-5 bg-light min-vh-100">
+    <Container fluid className="py-2 min-vh-80">
       <Row className="justify-content-center">
         <Col xs={12} xl={10}>
           <Card className="shadow-lg border-0">
