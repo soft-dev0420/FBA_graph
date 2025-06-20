@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Table, Badge, Button, Card, Form, InputGroup, Pagination, Modal } from 'react-bootstrap';
 import { FaSearch, FaSort, FaSortUp, FaSortDown, FaCog } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { setSelectedRow } from '../redux/reducers/excelReducer';
 
 const TableComponent = ({ data }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -253,6 +254,7 @@ const TableComponent = ({ data }) => {
                 style={{
                   transition: 'background-color 0.2s ease'
                 }}
+                onClick={() => {setSelectedRow(item); }}
               >
                 <td className="text-center">{renderImage(item["Image URL"])}</td>
                 {Object.keys(data[0] || {})

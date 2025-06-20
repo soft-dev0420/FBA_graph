@@ -2,21 +2,19 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as XLSX from 'xlsx';
 import TableComponent from '../components/TableComponent';
-import { setExcelData, setLoading } from '../redux/reducers/excelReducer';
+import { fetchExcelData } from '../redux/reducers/excelReducer';
 import { Container, Row, Col, Card, Button, Badge, Spinner } from 'react-bootstrap';
 
 const TablePage = () => {
   const [fileName, setFileName] = useState('');
   const dispatch = useDispatch();
-  const isLoading = useSelector((state) => state.excel.isLoading);
-  const excelData = useSelector((state) => state.excel.data);
+  const { isLoading, data: excelData, error } = useSelector((state) => state.excel);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setFileName(file.name);
-    dispatch(setLoading(true));
     const reader = new FileReader();
 
     reader.onload = (event) => {
@@ -26,17 +24,20 @@ const TablePage = () => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        dispatch(setExcelData(jsonData));
-      } catch (error) {
-        console.error('Error processing Excel file:', error);
-      } finally {
-        dispatch(setLoading(false));
+        const asins = jsonData.map(row => row[0]).filter(Boolean);
+
+        if (asins.length > 0) {
+          dispatch(fetchExcelData({ asins, country: 'IN' }));
+        } else {
+          console.warn('No ASINs found in the uploaded file.');
+        }
+      } catch (err) {
+        console.error('Error processing Excel file:', err);
       }
     };
 
-    reader.onerror = () => {
-      dispatch(setLoading(false));
-      console.error('Error reading file');
+    reader.onerror = (err) => {
+      console.error('Error reading file:', err);
     };
 
     reader.readAsBinaryString(file);
@@ -64,8 +65,27 @@ const TablePage = () => {
               {isLoading ? (
                 <div className="text-center py-5">
                   <Spinner animation="border" variant="primary" />
-                  <h4 className="text-secondary mt-3">Loading Excel File...</h4>
+                  <h4 className="text-secondary mt-3">Fetching ASIN Data from Amazon...</h4>
                   <p className="text-muted">Please wait while we process your data.</p>
+                </div>
+              ) : error ? (
+                 <div className="text-center py-5">
+                    <i className="bi bi-x-circle-fill text-danger" style={{ fontSize: '4rem' }}></i>
+                    <h4 className="text-danger mt-3 mb-2">An Error Occurred</h4>
+                    <p className="text-muted mb-4">{typeof error === 'object' ? JSON.stringify(error) : error}</p>
+                    <label htmlFor="fileInputError">
+                      <Button variant="primary" size="lg" as="span">
+                        <i className="bi bi-upload me-2"></i>
+                        Upload a Different File
+                      </Button>
+                    </label>
+                    <input
+                      type="file"
+                      className="d-none"
+                      id="fileInputError"
+                      accept=".xlsx, .xls"
+                      onChange={handleFileUpload}
+                    />
                 </div>
               ) : excelData.length === 0 ? (
                 <div className="text-center py-5">
