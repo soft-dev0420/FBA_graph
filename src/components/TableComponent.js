@@ -220,7 +220,7 @@ const TableComponent = ({ data }) => {
                 </div>
               </th>
               {Object.keys(data[0] || {})
-                .filter(key => key !== "Image URL" && selectedColumns[key])
+                .filter(key => key !== "Image URL" && key !=="exist"&& selectedColumns[key])
                 .map((key) => (
                   <th 
                     key={key} 
@@ -246,7 +246,7 @@ const TableComponent = ({ data }) => {
           </thead>
           <tbody>
             {paginatedData.map((item, index) => (
-              <tr 
+              item.exist&&<tr 
                 key={index} 
                 className={`border-bottom ${index % 2 === 0 ? 'bg-white' : 'bg-light'}`}
                 onMouseEnter={(e) => handleRowHover(e, item["Image URL"])}
@@ -258,7 +258,7 @@ const TableComponent = ({ data }) => {
               >
                 <td className="text-center">{renderImage(item["Image URL"])}</td>
                 {Object.keys(data[0] || {})
-                  .filter(key => key !== "Image URL" && selectedColumns[key])
+                  .filter(key => key !== "Image URL" && key !== "exist" && selectedColumns[key])
                   .map((key) => (
                     <td key={key} className="text-center">
                       {formatValue(item[key], key)}
@@ -344,7 +344,7 @@ const TableComponent = ({ data }) => {
         </Modal.Header>
         <Modal.Body>
           <div className="row row-cols-3 g-3">
-            {Object.keys(data[0] || {}).map((column) => (
+            {Object.keys(data[0] || {}).filter(key=>key!="exist" && key!="Image URL").map((column) => (
               <div key={column} className="col">
                 <div className="d-flex justify-content-between align-items-center p-2 border rounded">
                   <span className="text-truncate" title={column}>{column}</span>

@@ -9,7 +9,10 @@ export const fetchExcelData = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       // payload: { asins: [...], country: '...' }
-      const response = await axios.post(`${apiUrl}/asin/batch`, payload);
+      const country = "us";//payload.country;
+      const asins = payload.asins;
+      const response = await axios.post(apiUrl + '/asin/' + country, { asins });
+      console.log(response.data)
       return response.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
